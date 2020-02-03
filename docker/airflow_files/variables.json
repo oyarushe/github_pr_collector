@@ -1,0 +1,6 @@
+{
+  "github_pr_collector": {
+    "load_type": "incremental",
+    "repos": "apache/airflow"
+  }
+}

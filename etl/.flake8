@@ -1,0 +1,6 @@
+[flake8]
+max-line-length = 120
+show-source = True
+application-import-names = airflow_utils, github_plugin
+ignore = D401, W503, D413, F401
+import-order-style = pycharm
