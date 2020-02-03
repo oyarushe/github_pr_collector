@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+
+  airflow:
+    image: airflow_datarobot:latest
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.airflow
+    container_name: airflow
+    env_file:
+      - ./etl/env_vars/.env_airflow_conf
+    depends_on:
+      - postgres
+    ports:
+      - 9090:8080
+    volumes:
+      - ./etl/dags:/usr/local/airflow/dags
+      - ./etl/plugins:/usr/local/airflow/plugins
+      - ./etl/tests:/usr/local/airflow/tests
+      - ./etl/airflow-utils/src/airflow_utils:/usr/local/airflow/airflow-utils/src/airflow_utils
+      - ./etl/.flake8:/usr/local/airflow/.flake8
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.postgres
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: dbpassword
+    ports:
+      - 5432:5432
+
+  airflow_pycharm:
+    image: airflow_datarobot:latest
+    env_file:
+      - ./etl/env_vars/.env_airflow_conf
+    tty: true
+    volumes:
+      - ./etl/dags:/usr/local/airflow/dags
+      - ./etl/plugins:/usr/local/airflow/plugins
+      - ./etl/tests:/usr/local/airflow/tests
+      - ./etl/airflow-utils/src/airflow_utils:/usr/local/airflow/airflow-utils/src/airflow_utils
+      - ./etl/.flake8:/usr/local/airflow/.flake8
+    entrypoint: ''
+    command:
+      - bash
+
+networks:
+  default:
+    name: datarobot

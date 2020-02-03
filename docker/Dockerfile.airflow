@@ -1,0 +1,34 @@
+FROM puckel/docker-airflow:1.10.7
+
+USER root
+COPY docker/airflow_files/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+RUN chown -R airflow:airflow /usr/local
+
+USER airflow
+
+COPY --chown=airflow etl/requirements.txt /
+RUN python -m pip install -r /requirements.txt
+
+COPY --chown=airflow etl/requirements.dev.txt /
+RUN python -m pip install -r /requirements.dev.txt
+
+COPY --chown=airflow etl/airflow-utils ${AIRFLOW_HOME}/airflow-utils
+RUN python -m pip install --upgrade --editable ${AIRFLOW_HOME}/airflow-utils/.
+
+USER root
+COPY docker/airflow_files/init-connections.sh \
+  docker/airflow_files/init-variables.sh \
+  /entrypoint.d/
+RUN chmod -R +x /entrypoint.d
+
+USER airflow
+
+COPY etl/dags ${AIRFLOW_HOME}/dags
+COPY etl/plugins ${AIRFLOW_HOME}/plugins
+COPY etl/tests ${AIRFLOW_HOME}/tests
+
+COPY etl/.flake8 \
+  docker/airflow_files/variables.json \
+  ${AIRFLOW_HOME}/
